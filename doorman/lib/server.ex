@@ -1,11 +1,8 @@
 defmodule Doorman.Server do
 
   @name __MODULE__
-  @topic "nodes"
   use GenServer
   require Logger
-
-  alias Phoenix.PubSub
 
   def start_link(_) do
     Logger.info("start_link #{@name}")
@@ -14,10 +11,6 @@ defmodule Doorman.Server do
 
   def nodes do
     GenServer.call(@name, :nodes)
-  end
-
-  def subscribe do
-    PubSub.subscribe(@name, @topic)
   end
 
   def init(_) do
@@ -30,14 +23,14 @@ defmodule Doorman.Server do
   def handle_info({:nodeup, name}, nodes) do
     updated = nodes |> MapSet.put(name)
     Logger.info("Connected to #{inspect name}, nodes are now #{inspect updated}")
-    # PubSub.broadcast(@name, @topic, {:node_added, name})
+    Doorman.PubSub.broadcast({:node_added, name})
     {:noreply, updated}
   end
 
   def handle_info({:nodedown, name}, nodes) do
     updated = nodes |> MapSet.delete(name)
     Logger.info("Disconnected from #{inspect name}, nodes are now #{inspect updated}")
-        # PubSub.broadcast(@name, @topic, {:node_removed, name})
+    Doorman.PubSub.broadcast({:node_removed, name})
     {:noreply, updated}
   end
 

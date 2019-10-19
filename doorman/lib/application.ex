@@ -13,11 +13,9 @@ defmodule Doorman.Application do
     ]
 
     children = [
-      # supervisor(Phoenix.PubSub.PG2, [@name, []]),
-      # supervisor(Registry, [:duplicate, :pubsub_elixir_registry]),
+      {Phoenix.PubSub.PG2, name: Doorman.PubSub},
       {Cluster.Supervisor, [topologies, [name: Doorman.ClusterSupervisor]]},
       Doorman.Server
-      # worker(Doorman.Server, @name)
     ]
 
     opts = [strategy: :one_for_one, name: Doorman.Supervisor]
