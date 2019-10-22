@@ -1,4 +1,4 @@
-defmodule Dashboard.NodesLive do
+defmodule DashboardWeb.NodesLive do
   use Phoenix.LiveView
 
   def render(assigns) do
@@ -11,11 +11,30 @@ defmodule Dashboard.NodesLive do
     if connected?(socket) do
       Doorman.subscribe()
     end
-    {:ok, assign(socket, :nodes, Doorman.nodes())}
+
+    state = Doorman.nodes()
+      |> Enum.map(fn x ->  {Atom.to_string(x), Dashboard.Node.new(x))
+      |> Map.new
+
+    {:ok, assign(socket, :nodes, state}
   end
 
-  def handle_info({:nodes_changed, nodes}, socket) do
-    {:noreply, assign(socket, :nodes, nodes)}
+  def handle_info({:node_added, node}, socket) do
+
+  end
+
+  def handle_info({:node_removed, node}, socket) do
+
+  end
+
+  def handle_info(_, socket) do
+    {:noreply, socket}
+  end
+
+  defp map_nodes(nodes) do
+    nodes 
+      |> Enum.map(fn x -> Atom.to_string(x) end)
   end
 
 end
+

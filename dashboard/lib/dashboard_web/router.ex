@@ -17,8 +17,7 @@ defmodule DashboardWeb.Router do
   scope "/", DashboardWeb do
     pipe_through :browser
     live "/nodes", NodesLive, session: []
-
-    # get "/", PageController, :index
+    get "/", PageController, :index
   end
 
   # Other scopes may use custom stacks.
