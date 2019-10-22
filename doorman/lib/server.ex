@@ -24,6 +24,7 @@ defmodule Doorman.Server do
     updated = nodes |> MapSet.put(name)
     Logger.info("Connected to #{inspect name}, nodes are now #{inspect updated}")
     Doorman.PubSub.broadcast({:node_added, name})
+    Doorman.PubSub.broadcast({:nodes_changed, updated})
     {:noreply, updated}
   end
 
@@ -31,6 +32,7 @@ defmodule Doorman.Server do
     updated = nodes |> MapSet.delete(name)
     Logger.info("Disconnected from #{inspect name}, nodes are now #{inspect updated}")
     Doorman.PubSub.broadcast({:node_removed, name})
+    Doorman.PubSub.broadcast({:nodes_changed, updated})
     {:noreply, updated}
   end
 
