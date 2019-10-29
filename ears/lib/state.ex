@@ -1,7 +1,7 @@
 defmodule Ears.State do
 
-  @enforce_keys [:status, :since]
-  defstruct [:status, :since]
+  @enforce_keys [:node, :status, :since]
+  defstruct [:node, :status, :since]
 
   @type status :: :up | :down | :offline | :waiting
 
@@ -11,8 +11,8 @@ defmodule Ears.State do
       }
 
   @spec new(status, DateTime.t) :: Ears.State.t
-  def new(status, since) do
-    %Ears.State{status: status, since: since}
+  def new(node, status, since) do
+    %Ears.State{node: node, status: status, since: since}
   end
 
   def merge(nil, %Ears.State{} = stateB) do

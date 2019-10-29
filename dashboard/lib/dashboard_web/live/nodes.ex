@@ -4,9 +4,7 @@ defmodule DashboardWeb.NodesLive do
   require Logger
 
   def render(assigns) do
-    ~L"""
-    Nodes: <%= @nodes %>
-    """
+    Phoenix.View.render(DashboardWeb.PageView, "nodes.html", assigns)
   end
 
   def mount(_, socket) do

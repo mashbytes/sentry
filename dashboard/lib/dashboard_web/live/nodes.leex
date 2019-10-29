@@ -1,0 +1,5 @@
+Nodes: <%= @nodes %>
+
+<%= for node <- @nodes do %>
+  <%= render "node.html", assigns %>
+<% end %>

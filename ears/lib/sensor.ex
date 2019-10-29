@@ -16,7 +16,7 @@ defmodule Ears.Sensor do
   def init(_) do
     Logger.debug("Starting hardware on pin #{@input_pin}")
     GenServer.cast(@name, :setup)
-    model = update_model(%{gpio: nil, state: nil}, Ears.State.new(:offline, DateTime.utc_now()))
+    model = update_model(%{gpio: nil, state: nil}, Ears.State.new(Node.self(), :offline, DateTime.utc_now()))
     {:ok, model}
   end
 
@@ -32,7 +32,7 @@ defmodule Ears.Sensor do
   end
 
   def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, model) do
-    new_model = update_model(model, Ears.State.new(:up, timestamp))
+    new_model = update_model(model, Ears.State.new(Node.self(), :up, timestamp))
 
     Logger.debug("Received high signal @#{timestamp}, model is [#{inspect new_model}")
     {:noreply, new_model, @tick_timeout}
