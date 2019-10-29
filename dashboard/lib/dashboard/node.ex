@@ -12,9 +12,9 @@ defmodule Dashboard.Node do
         components: Map.t()
       }
 
-  @spec new(name) :: Dashboard.Node.t
+  # @spec new(name) :: Dashboard.Node.t
   def new(name) do
-    %Dashboard.Node{name: name, status: :online}
+    %Dashboard.Node{name: name, status: :online, components: %{}}
   end
 
   def merge(%Dashboard.Node{} = node, %Ears.State{} = state) do

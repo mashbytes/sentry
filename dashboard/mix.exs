@@ -41,7 +41,7 @@ defmodule Dashboard.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:doorman, path: "../doorman"},
-      {:ears, path: "../ears"},
+      {:ears, path: "../ears", runtime: false},
 
     ]
   end
