@@ -1,29 +1,26 @@
 defmodule Ears.State do
+  
+  defmacro __using__(_) do
+    quote do
+      defstruct [:since]
 
-  @enforce_keys [:node, :status, :since]
-  defstruct [:node, :status, :since]
-
-  @type status :: :up | :down | :offline | :waiting
-
-  @type t() :: %__MODULE__{
-        status: status,
-        since: DateTime.t()
-      }
-
-  @spec new(status, DateTime.t) :: Ears.State.t
-  def new(node, status, since) do
-    %Ears.State{node: node, status: status, since: since}
-  end
-
-  def merge(nil, %Ears.State{} = stateB) do
-    stateB
-  end
-
-  def merge(%Ears.State{status: statusA, since: _} = stateA, %Ears.State{status: statusB, since: _} = stateB) do
-    case {statusA, statusB} do
-      {statusA, statusA} -> stateA
-      _ -> stateB
+      def new(since \\ DateTime.utc_now()) do
+        %__MODULE__{ since: since }
+      end
     end
   end
 
 end
+
+defmodule Ears.State.Offline do
+  use Ears.State
+end
+
+defmodule Ears.State.Noisy do
+  use Ears.State
+end
+
+defmodule Ears.State.Quiet do
+  use Ears.State
+end
+
