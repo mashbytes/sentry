@@ -12,19 +12,27 @@ defmodule DashboardWeb.NodesLive do
       Doorman.subscribe()
     end
 
-    state = Doorman.nodes()
-      |> Enum.map(fn x ->  {Atom.to_string(x), Dashboard.Node.new(x)} end)
-      |> Map.new
+    socket =
+      socket
+      |> assign(:nodes, %{ :online => [], :offline => []})
 
-    {:ok, assign(socket, :nodes, state)}
+    {:ok, socket}
   end
 
-  def handle_info({:node_added, node}, socket) do
-    Logger.debug("node_added #{node}")
+  def handle_info(%Doorman.Events.Nodes{online: online, offline: offline}, socket) do
+    Logger.debug("nodes received online #{inspect online} offline #{inspect offline}")
+    state = %{:online => online, :offline => offline}
+    {:noreply, assign(socket, :nodes, state)}
   end
 
-  def handle_info({:node_removed, node}, socket) do
-    Logger.debug("node_removed #{node}")
+  def handle_info(%Doorman.Events.NodeUp{}, socket) do
+    Logger.debug("NodeUp received")
+    {:noreply, socket}
+  end
+
+  def handle_info(%Doorman.Events.NodeDown{}, socket) do
+    Logger.debug("NodeUp received")
+    {:noreply, socket}
   end
 
   def handle_info(message, socket) do

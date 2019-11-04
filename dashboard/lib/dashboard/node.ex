@@ -17,14 +17,14 @@ defmodule Dashboard.Node do
     %Dashboard.Node{name: name, status: :online, components: %{}}
   end
 
-  def merge(%Dashboard.Node{} = node, %Ears.State{} = state) do
-    updated_components = Map.put(node.components, "ears", state)
-    %{node | components: updated_components}
-  end
+  # def merge(%Dashboard.Node{} = node, %Ears.State{} = state) do
+  #   updated_components = Map.put(node.components, "ears", state)
+  #   %{node | components: updated_components}
+  # end
 
-  def merge(%Dashboard.Node{} = node, state) do
-    Logger.warn("Unsupported update #{inspect state}")
-    node
-  end
+  # def merge(%Dashboard.Node{} = node, state) do
+  #   Logger.warn("Unsupported update #{inspect state}")
+  #   node
+  # end
 
 end

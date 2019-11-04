@@ -10,16 +10,27 @@ defmodule DashboardWeb.LiveView.Node do
       Ears.subscribe()
     end
 
-    updated = 
-      socket
-      |> assign(:vm, DashboardWeb.LiveView.Node.ViewModel.new(node))
-
-    {:ok, updated}
+    {:ok, assign(socket, :node, node)}
   end
 
-  def handle_info({:node_added, node}, socket) do
-
+  def handle_info(%Ears.Events.Noisy{ node: node }, socket) do
+    case {node, socket.assigns.node} do
+      {^node, ^node} ->
+        {:noreply, assign(socket, :state, :noisy) }
+      _ ->
+        {:noreply, socket}
+    end
   end
+
+  def handle_info(%Ears.Events.Quiet{ node: node }, socket) do
+    case {node, socket.assigns.node} do
+      {^node, ^node} ->
+        {:noreply, assign(socket, :state, :quiet) }
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
 
 end
 

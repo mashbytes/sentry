@@ -1,0 +1,7 @@
+Nodes: <%= inspect @nodes %>
+
+<%= for node <- @nodes do %>
+  <%# <%= Phoenix.LiveView.live_render(@conn, AppWeb.ThermostatLive, session: %{user_id: @user.id}) %> %>
+
+  <%= render "node.html", %{:node => node} %>
+<% end %>
