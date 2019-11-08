@@ -14,15 +14,29 @@ defmodule DashboardWeb.NodesLive do
 
     socket =
       socket
-      |> assign(:nodes, %{ :online => [], :offline => []})
+      |> assign(:nodes, %{})
 
     {:ok, socket}
   end
 
   def handle_info(%Doorman.Events.Nodes{online: online, offline: offline}, socket) do
     Logger.debug("nodes received online #{inspect online} offline #{inspect offline}")
-    state = %{:online => online, :offline => offline}
-    {:noreply, assign(socket, :nodes, state)}
+    online_map = online
+      |> Map.new(fn n -> {n, DashboardWeb.NodesLive.Node.new(n)} end)
+    
+    nodes = socket.assigns.nodes
+      |> Map.merge(online_map fn _k, existing, new) -> Map.merge(%{:status => :online} end)
+
+    online_nodes = online
+      |> Enum.map(fn on -> 
+          Map.get(nodes, on, DashboardWeb.NodesLive.Node.new(on))
+            |> Map.merge(%{:status => :online})
+         end)
+      |>
+
+    nodes = Map.merge(nodes, online_nodes)
+
+    {:noreply, assign(socket, :nodes, nodes)}
   end
 
   def handle_info(%Doorman.Events.NodeUp{}, socket) do
@@ -47,3 +61,10 @@ defmodule DashboardWeb.NodesLive do
 
 end
 
+defmodule DashboardWeb.NodesLive.Node do
+  defstruct [:name, :status, :sensors]
+
+  def new(name, status \\ :offline, sensors \\ %{}) do
+    %__MODULE__{ name: name, status: status, sensors: sensors }
+  end
+end
