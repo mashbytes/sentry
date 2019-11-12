@@ -50,7 +50,7 @@ defmodule DashboardWeb.NodesLive do
   end
 
   def handle_info(message, socket) do
-    Logger.debug("unrecognized message #{message}")
+    Logger.debug("unrecognized message #{inspect message}")
     {:noreply, socket}
   end
 
