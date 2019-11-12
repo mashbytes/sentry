@@ -10,6 +10,7 @@ use Mix.Config
 # Configures the endpoint
 config :dashboard, DashboardWeb.Endpoint,
   url: [host: "localhost"],
+  http: [port: 80],
   secret_key_base: "ngkJ+MOUsr+mcdcWmiHkyy8L/HqT892cEtLzTKlOyQwxIpWwy6qRa3H5wtZUP2yD",
   render_errors: [view: DashboardWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Dashboard.PubSub, adapter: Phoenix.PubSub.PG2],
@@ -18,9 +19,13 @@ config :dashboard, DashboardWeb.Endpoint,
    ]
 
 # Configures Elixir's Logger
-config :logger, :console,
+config :logger,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:request_id],
+  level: :debug
+# config :logger, :console,
+#   format: "$time $metadata[$level] $message\n",
+#   metadata: [:request_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -28,3 +33,5 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
+
+# Logger.info("Using Mix.env #{Mix.env()}")

@@ -40,8 +40,10 @@ defmodule Dashboard.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
+      {:libcluster, "~> 3.1"},
+
       {:doorman, path: "../doorman"},
-      {:ears, path: "../ears", runtime: false},
+      {:ears, path: "../ears"},
 
     ]
   end

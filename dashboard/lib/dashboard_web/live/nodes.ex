@@ -3,6 +3,9 @@ defmodule DashboardWeb.NodesLive do
 
   require Logger
 
+  alias DashboardWeb.NodesLive.Node
+  # alias DashboardWeb.NodesLive.NodeState
+
   def render(assigns) do
     Phoenix.View.render(DashboardWeb.PageView, "nodes.html", assigns)
   end
@@ -10,6 +13,7 @@ defmodule DashboardWeb.NodesLive do
   def mount(_, socket) do
     if connected?(socket) do
       Doorman.subscribe()
+      Ears.subscribe()
     end
 
     socket =
@@ -21,20 +25,16 @@ defmodule DashboardWeb.NodesLive do
 
   def handle_info(%Doorman.Events.Nodes{online: online, offline: offline}, socket) do
     Logger.debug("nodes received online #{inspect online} offline #{inspect offline}")
-    online_map = online
-      |> Map.new(fn n -> {n, DashboardWeb.NodesLive.Node.new(n)} end)
-    
     nodes = socket.assigns.nodes
-      |> Map.merge(online_map fn _k, existing, new) -> Map.merge(%{:status => :online} end)
-
-    online_nodes = online
-      |> Enum.map(fn on -> 
-          Map.get(nodes, on, DashboardWeb.NodesLive.Node.new(on))
-            |> Map.merge(%{:status => :online})
-         end)
-      |>
-
-    nodes = Map.merge(nodes, online_nodes)
+    online_map = online
+      |> Map.new(fn n -> 
+        state = Map.get(nodes, n, Node.new(n))
+          |> Node.merge_status(:online)
+        {n, state}
+      end)
+    
+    nodes = nodes
+      |> Map.merge(online_map)
 
     {:noreply, assign(socket, :nodes, nodes)}
   end
@@ -54,12 +54,24 @@ defmodule DashboardWeb.NodesLive do
     {:noreply, socket}
   end
 
-  defp map_nodes(nodes) do
-    nodes 
-      |> Enum.map(fn x -> Atom.to_string(x) end)
-  end
-
 end
+
+# defmodule DashboardWeb.NodesLive.Node do
+#   defstruct [:name, :status]
+
+#   def new(name, status \\ :offline) do
+#     %__MODULE__{ name: name, status: status }
+#   end
+# end
+
+# defmodule DashboardWeb.NodesLive.NodeState do
+#   defstruct [:name, :sensors]
+
+#   def new(name, sensors \\ %{}) do
+#     %__MODULE__{ name: name, sensors: sensors }
+#   end
+# end
+
 
 defmodule DashboardWeb.NodesLive.Node do
   defstruct [:name, :status, :sensors]
@@ -67,4 +79,13 @@ defmodule DashboardWeb.NodesLive.Node do
   def new(name, status \\ :offline, sensors \\ %{}) do
     %__MODULE__{ name: name, status: status, sensors: sensors }
   end
+
+  def merge_status(%__MODULE__{status: status} = node, status) do
+    node
+  end
+
+  def merge_status(%__MODULE__{} = node, new_status) do
+    %{node | status: new_status}
+  end
+
 end
