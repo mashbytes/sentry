@@ -26,6 +26,23 @@ config :shoehorn,
 
 config :logger, backends: [RingLogger]
 
+config :dashboard, DashboardWeb.Endpoint,
+  url: [host: "nerves.local"],
+  http: [port: 80],
+  secret_key_base: "ngkJ+MOUsr+mcdcWmiHkyy8L/HqT892cEtLzTKlOyQwxIpWwy6qRa3H5wtZUP2yD",
+  root: Path.dirname(__DIR__),
+  server: true,
+  render_errors: [view: UiWeb.ErrorView, accepts: ~w(html json)],
+  pubsub: [name: Nerves.PubSub, adapter: Phoenix.PubSub.PG2],
+  live_view: [
+    signing_salt: "SWjnR7UyD/k1ns5TvlpM5aWtp0emA+Mm"
+  ],
+  code_reloader: false
+
+
+config :phoenix, :json_library, Jason
+
+
 if Mix.target() != :host do
   import_config "target.exs"
 end

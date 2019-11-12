@@ -11,7 +11,7 @@ defmodule Ears.Application do
       Ears.Sensor
     ]
 
-    opts = [strategy: :one_for_one, name: Doorman.Supervisor]
+    opts = [strategy: :one_for_one, name: Ears.Supervisor]
     Supervisor.start_link(children, opts)
   end
 end

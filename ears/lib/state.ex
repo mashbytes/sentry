@@ -7,6 +7,15 @@ defmodule Ears.State do
       def new(since \\ DateTime.utc_now()) do
         %__MODULE__{ since: since }
       end
+
+      def merge(%__MODULE__{} = me, %__MODULE__{}) do
+        me
+      end
+
+      def merge(%__MODULE__{}, other) do
+        other
+      end
+
     end
   end
 

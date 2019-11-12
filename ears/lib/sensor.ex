@@ -27,7 +27,7 @@ defmodule Ears.Sensor do
   end
 
   def broadcast_snapshot() do
-    GenServer.call(@name, :snapshot)
+    GenServer.cast(@name, :snapshot)
   end
 
   def handle_cast(:setup, %Model{state: %Ears.State.Offline{}} = model) do
@@ -54,22 +54,25 @@ defmodule Ears.Sensor do
 
   def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, model) do
     updated = Model.merge_state(model, State.Noisy.new(timestamp))
-    PubSub.broadcast(updated.state)
-
     Logger.debug("Received high signal @#{timestamp}, model is [#{inspect updated}")
+    if model != updated do
+      PubSub.broadcast(updated.state)  
+    end
+
     {:noreply, updated, @tick_timeout}
   end
 
   def handle_info(:timeout, model) do
     updated = Model.merge_state(model, State.Quiet.new())
-
-    PubSub.broadcast(updated.state)
-
     Logger.debug("Timeout occurred waiting for signal, model is [#{inspect updated}]")
+    if model != updated do
+      PubSub.broadcast(updated.state)  
+    end
+
     {:noreply, updated}    
   end
 
-  def handle_call(:snapshot, model) do
+  def handle_cast(:snapshot, model) do
     PubSub.broadcast(model.state)
     {:noreply, model}
   end
