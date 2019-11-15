@@ -8,7 +8,7 @@ defmodule Ears.Sensor do
   alias Ears.Sensor.Model
 
   @input_pin Application.get_env(:ears, :sound_input_pin, 4)
-  @tick_timeout Application.get_env(:ears, :tick_timeout, 2_000)
+  @tick_timeout Application.get_env(:ears, :tick_timeout, 5_000)
   @setup_timeout Application.get_env(:ears, :setup_timeout, 10_000)
   @name __MODULE__
 
@@ -66,16 +66,6 @@ defmodule Ears.Sensor do
   def handle_info(:timeout, %Model{state: :quiet} = existing) do
     Logger.debug("Timeout occurred waiting for signal, model is [#{inspect existing}]")
     {:noreply, existing}
-  end
-
-  def handle_info(:timeout, existing) do
-    updated = Model.merge_state(existing, :quiet, DateTime.utc_now())
-    Logger.debug("Timeout occurred waiting for signal, model is [#{inspect updated}]")
-    if existing != updated do
-      broadcast(updated)
-    end
-
-    {:noreply, updated}
   end
 
   def handle_cast(:snapshot, model) do
