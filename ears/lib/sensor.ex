@@ -29,6 +29,8 @@ defmodule Ears.Sensor do
     GenServer.cast(@name, :snapshot)
   end
 
+  #TODO: timestamp is time in nanos since host boot time
+  #https://github.com/elixir-circuits/circuits_gpio/blob/master/lib/gpio.ex
   def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, %Model{state: :offline} = existing) do
     updated = Model.merge_state(existing, :noisy, timestamp)
     Logger.debug("Received high signal @#{timestamp}, model is [#{inspect updated}")
