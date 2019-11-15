@@ -29,6 +29,13 @@ defmodule Ears.Sensor do
     GenServer.cast(@name, :snapshot)
   end
 
+  def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, %Model{state: :offline} = existing) do
+    updated = Model.merge_state(existing, :noisy, timestamp)
+    Logger.debug("Received high signal @#{timestamp}, model is [#{inspect updated}")
+    broadcast(updated)
+    {:noreply, updated, @tick_timeout}
+  end
+
   def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, %Model{state: :quiet} = existing) do
     updated = Model.merge_state(existing, :noisy, timestamp)
     Logger.debug("Received high signal @#{timestamp}, model is [#{inspect updated}")
