@@ -12,6 +12,18 @@ defmodule Ears.PubSub do
     Phoenix.PubSub.subscribe(@name, @topic)
   end
 
+  def broadcast(:offline, since) do
+    broadcast(Events.Offline.new(since))
+  end
+
+  def broadcast(:noisy, since) do
+    broadcast(Events.Noisy.new(since))
+  end
+
+  def broadcast(:quiet, since) do
+    broadcast(Events.Quiet.new(since))
+  end
+
   def broadcast(%State.Offline{} = state) do
     broadcast(Events.Offline.new(state.since))
   end

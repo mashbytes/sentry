@@ -1,11 +1,9 @@
 defmodule Ears.Sensor do
-    
+
   use GenServer
 
   require Logger
 
-  alias Ears.State
-  alias Ears.Events
   alias Ears.PubSub
   alias Ears.Sensor.Model
 
@@ -22,19 +20,67 @@ defmodule Ears.Sensor do
   def init(_) do
     Logger.debug("Starting hardware on pin #{@input_pin}")
     GenServer.cast(@name, :setup)
-    PubSub.broadcast(Events.Offline.new())
-    {:ok, Model.new()}
+    model = Model.new()
+    broadcast(model)
+    {:ok, model}
   end
 
   def broadcast_snapshot() do
     GenServer.cast(@name, :snapshot)
   end
 
-  def handle_cast(:setup, %Model{state: %Ears.State.Offline{}} = model) do
+  def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, %Model{state: :quiet} = existing) do
+    updated = Model.merge_state(existing, :noisy, timestamp)
+    Logger.debug("Received high signal @#{timestamp}, model is [#{inspect updated}")
+    broadcast(updated)
+    {:noreply, updated, @tick_timeout}
+  end
+
+  def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, %Model{state: :noisy} = existing) do
+    Logger.debug("Received high signal @#{timestamp}, model is [#{inspect existing}")
+    {:noreply, existing, @tick_timeout}
+  end
+
+  def handle_info(:timeout, %Model{state: :offline} = existing) do
+    updated = Model.merge_gpio(existing, nil)
+    Logger.debug("Timeout occurred waiting for gpio setup, model is [#{inspect updated}]")
+    broadcast(updated)
+    GenServer.cast(@name, :setup)
+    {:noreply, updated}
+  end
+
+  def handle_info(:timeout, %Model{state: :noisy} = existing) do
+    updated = Model.merge_state(existing, :quiet, DateTime.utc_now())
+    Logger.debug("Timeout occurred waiting for signal, model is [#{inspect updated}]")
+    broadcast(updated)
+    {:noreply, updated}
+  end
+
+  def handle_info(:timeout, %Model{state: :quiet} = existing) do
+    Logger.debug("Timeout occurred waiting for signal, model is [#{inspect existing}]")
+    {:noreply, existing}
+  end
+
+  def handle_info(:timeout, existing) do
+    updated = Model.merge_state(existing, :quiet, DateTime.utc_now())
+    Logger.debug("Timeout occurred waiting for signal, model is [#{inspect updated}]")
+    if existing != updated do
+      broadcast(updated)
+    end
+
+    {:noreply, updated}
+  end
+
+  def handle_cast(:snapshot, model) do
+    broadcast(model)
+    {:noreply, model}
+  end
+
+  def handle_cast(:setup, %Model{state: :offline} = model) do
     Logger.debug("Setting up #{@name}")
-        
+
     case Circuits.GPIO.open(@input_pin, :input) do
-      {:ok, pid} -> 
+      {:ok, pid} ->
         :ok = Circuits.GPIO.set_interrupts(pid, :rising)
         {:noreply, Model.merge_gpio(model, pid), @setup_timeout}
       _ ->
@@ -42,40 +88,8 @@ defmodule Ears.Sensor do
     end
   end
 
-  def handle_info(:timeout, %Model{state: %Ears.State.Offline{}} = model) do
-    updated = Model.merge_gpio(model, nil)
-    PubSub.broadcast(updated.state)
-
-    GenServer.cast(@name, :setup)
-
-    Logger.debug("Timeout occurred waiting for gpio setup, model is [#{inspect updated}]")
-    {:noreply, updated}    
+  def broadcast(%Model{} = model) do
+    PubSub.broadcast(model.state, model.since)
   end
-
-  def handle_info({:circuits_gpio, @input_pin, timestamp, 1}, model) do
-    updated = Model.merge_state(model, State.Noisy.new(timestamp))
-    Logger.debug("Received high signal @#{timestamp}, model is [#{inspect updated}")
-    if model != updated do
-      PubSub.broadcast(updated.state)  
-    end
-
-    {:noreply, updated, @tick_timeout}
-  end
-
-  def handle_info(:timeout, model) do
-    updated = Model.merge_state(model, State.Quiet.new())
-    Logger.debug("Timeout occurred waiting for signal, model is [#{inspect updated}]")
-    if model != updated do
-      PubSub.broadcast(updated.state)  
-    end
-
-    {:noreply, updated}    
-  end
-
-  def handle_cast(:snapshot, model) do
-    PubSub.broadcast(model.state)
-    {:noreply, model}
-  end
-
 end
 

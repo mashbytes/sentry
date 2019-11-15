@@ -4,7 +4,6 @@ defmodule DashboardWeb.NodesLive do
   require Logger
 
   alias DashboardWeb.NodesLive.Node
-  # alias DashboardWeb.NodesLive.NodeState
 
   def render(assigns) do
     Phoenix.View.render(DashboardWeb.PageView, "nodes.html", assigns)
@@ -18,36 +17,74 @@ defmodule DashboardWeb.NodesLive do
 
     socket =
       socket
-      |> assign(:nodes, %{})
+      |> assign(:online, [])
+      |> assign(:offline, [])
 
     {:ok, socket}
   end
 
   def handle_info(%Doorman.Events.Nodes{online: online, offline: offline}, socket) do
     Logger.debug("nodes received online #{inspect online} offline #{inspect offline}")
-    nodes = socket.assigns.nodes
-    online_map = online
-      |> Map.new(fn n -> 
-        state = Map.get(nodes, n, Node.new(n))
-          |> Node.merge_status(:online)
-        {n, state}
-      end)
-    
-    nodes = nodes
-      |> Map.merge(online_map)
+    # todo remove entries into assigns for nodes that no longer exist
 
-    {:noreply, assign(socket, :nodes, nodes)}
-  end
+    socket =
+      socket
+      |> assign(:online, Enum.map(online, fn x -> Atom.to_string(x) end))
+      |> assign(:offline, Enum.map(offline, fn x -> Atom.to_string(x) end))
 
-  def handle_info(%Doorman.Events.NodeUp{}, socket) do
-    Logger.debug("NodeUp received")
     {:noreply, socket}
   end
 
-  def handle_info(%Doorman.Events.NodeDown{}, socket) do
+  def handle_info(%Doorman.Events.NodeUp{} = event, socket) do
     Logger.debug("NodeUp received")
+    online =
+      socket.assigns.online
+      |> MapSet.new
+      |> MapSet.put(Atom.to_string(event.node))
+      |> MapSet.to_list
+
+    {:noreply, assign(socket, :online, online)}
+  end
+
+  def handle_info(%Doorman.Events.NodeDown{} = event, socket) do
+    Logger.debug("NodeDown received")
+    offline =
+      socket.assigns.offline
+      |> MapSet.new
+      |> MapSet.put(Atom.to_string(event.node))
+      |> MapSet.to_list
+
+    {:noreply, assign(socket, :offline, offline)}
+  end
+
+  def handle_info(%Ears.Events.Noisy{} = event, socket) do
+    key = Atom.to_string(event.node)
+    socket =
+      socket
+      |> assign_new(key, fn -> Node.new(key) end)
+      |> update(key, fn v -> Node.merge_sensor(v, "ears", event) end)
+
+    Logger.debug("Noisy received")
     {:noreply, socket}
   end
+
+  def handle_info(%Ears.Events.Quiet{} = event, socket) do
+    key = Atom.to_string(event.node)
+    socket =
+      socket
+      |> assign_new(key, fn -> Node.new(key) end)
+      |> update(key, fn v -> Node.merge_sensor(v, "ears", event) end)
+
+
+    Logger.debug("Quiet received")
+    {:noreply, socket}
+  end
+
+  def handle_info(%Ears.Events.Offline{} = _event, socket) do
+    Logger.debug("Offline received")
+    {:noreply, socket}
+  end
+
 
   def handle_info(message, socket) do
     Logger.debug("unrecognized message #{inspect message}")
@@ -56,36 +93,34 @@ defmodule DashboardWeb.NodesLive do
 
 end
 
-# defmodule DashboardWeb.NodesLive.Node do
-#   defstruct [:name, :status]
-
-#   def new(name, status \\ :offline) do
-#     %__MODULE__{ name: name, status: status }
-#   end
-# end
-
-# defmodule DashboardWeb.NodesLive.NodeState do
-#   defstruct [:name, :sensors]
-
-#   def new(name, sensors \\ %{}) do
-#     %__MODULE__{ name: name, sensors: sensors }
-#   end
-# end
-
-
 defmodule DashboardWeb.NodesLive.Node do
-  defstruct [:name, :status, :sensors]
+  defstruct [:name, :sensors]
 
-  def new(name, status \\ :offline, sensors \\ %{}) do
-    %__MODULE__{ name: name, status: status, sensors: sensors }
+  def new(name, sensors \\ %{}) do
+    %__MODULE__{ name: name, sensors: sensors }
   end
 
-  def merge_status(%__MODULE__{status: status} = node, status) do
-    node
+  def merge_sensor(%__MODULE__{} = node, key, state) do
+    sensors =
+      node.sensors
+      |> Map.put(key, state)
+    %{node | sensors: sensors}
   end
 
-  def merge_status(%__MODULE__{} = node, new_status) do
-    %{node | status: new_status}
-  end
+end
 
+defimpl Phoenix.HTML.Safe, for: DashboardWeb.NodesLive.Node do
+  def to_iodata(data), do: inspect(data)
+end
+
+defimpl Phoenix.HTML.Safe, for: Ears.Events.Noisy do
+  def to_iodata(data), do: inspect(data)
+end
+
+defimpl Phoenix.HTML.Safe, for: Ears.Events.Quiet do
+  def to_iodata(data), do: inspect(data)
+end
+
+defimpl Phoenix.HTML.Safe, for: Ears.Events.Offline do
+  def to_iodata(data), do: inspect(data)
 end

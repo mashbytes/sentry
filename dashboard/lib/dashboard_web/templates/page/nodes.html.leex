@@ -1,7 +1,14 @@
-Nodes: <%= inspect @nodes %>
+Online Nodes: <%= inspect @online %>
+<br/>
+<br/>
+Offline Nodes: <%= inspect @offline %>
+<br/>
+<br/>
 
-<%= for node <- @nodes do %>
-  <%# <%= Phoenix.LiveView.live_render(@conn, AppWeb.ThermostatLive, session: %{user_id: @user.id}) %> %>
+<%= for node <- @online do %>
+  <%= assigns[node] %>
+<% end %>
 
-  <%= render "node.html", %{:node => node} %>
+<%= for node <- @offline do %>
+  <%= assigns[node] %>
 <% end %>
