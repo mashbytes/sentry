@@ -32,7 +32,7 @@ config :dashboard, DashboardWeb.Endpoint,
   secret_key_base: "ngkJ+MOUsr+mcdcWmiHkyy8L/HqT892cEtLzTKlOyQwxIpWwy6qRa3H5wtZUP2yD",
   root: Path.dirname(__DIR__),
   server: true,
-  render_errors: [view: UiWeb.ErrorView, accepts: ~w(html json)],
+  render_errors: [view: DashboardWeb.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Nerves.PubSub, adapter: Phoenix.PubSub.PG2],
   live_view: [
     signing_salt: "SWjnR7UyD/k1ns5TvlpM5aWtp0emA+Mm"
