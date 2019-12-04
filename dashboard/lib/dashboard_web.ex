@@ -43,8 +43,7 @@ defmodule DashboardWeb do
       import DashboardWeb.ErrorHelpers
       import DashboardWeb.Gettext
       import Phoenix.LiveView, only: [live_render: 2, live_render: 3, live_link: 1, live_link: 2]
-      # import Phoenix.LiveComponent, only: [live_component: 2, live_component: 3, live_component: 4]
- #      import Phoenix.LiveView, only: [live_render: 2, live_render: 3, live_link: 1, live_link: 2, live_component: 2, live_component: 3, live_component: 4]
+      # import Phoenix.LiveView, only: [live_render: 2, live_render: 3, live_link: 1, live_link: 2, live_component: 3]
 
       alias DashboardWeb.Router.Helpers, as: Routes
 
