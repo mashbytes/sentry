@@ -11,12 +11,14 @@ defmodule Ears.Application do
       Ears.Sensor
     ]
 
+    opts = [strategy: :one_for_one, name: Ears.Supervisor]
+
     if Mix.target() == :host do
-      Ears.MockSensor
+      Supervisor.start_link([Ears.MockSensor | children], opts)
+    else
+      Supervisor.start_link(children, opts)
     end
 
-    opts = [strategy: :one_for_one, name: Ears.Supervisor]
-    Supervisor.start_link(children, opts)
   end
 
 end

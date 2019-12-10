@@ -70,18 +70,6 @@ defmodule Ears.Sensor do
     {:noreply, model}
   end
 
-  def handle_cast(:setup, %Model{state: :offline} = model) do
-    Logger.debug("Setting up #{@name}")
-
-    case Circuits.GPIO.open(@input_pin, :input) do
-      {:ok, pid} ->
-        :ok = Circuits.GPIO.set_interrupts(pid, :rising)
-        {:noreply, Model.merge_gpio(model, pid), @setup_timeout}
-      _ ->
-        {:noreply, model, @setup_timeout}
-    end
-  end
-
   def broadcast(%Model{} = model) do
     PubSub.broadcast(model.state, model.since)
   end
