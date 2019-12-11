@@ -6,12 +6,9 @@ Offline Nodes: <%= inspect @offline %>
 <br/>
 
 <%= for node <- @online do %>
-  <%= assigns[node] %>
-  <%# <%= render "child_template.html", assigns %>
-
-  <%# <%= live_component @socket, DashboardWeb.NodeComponent, node: node %>
+  <%= live_component @socket, DashboardWeb.NodeComponent, node: node %>
 <% end %>
 
 <%= for node <- @offline do %>
-  <%= assigns[node] %>
+  <%= live_component @socket, DashboardWeb.NodeComponent, node: node %>
 <% end %>

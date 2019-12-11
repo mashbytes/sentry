@@ -16,7 +16,6 @@ defmodule DashboardWeb.NodesLive do
 
     if connected?(socket) do
       Doorman.subscribe()
-      Ears.subscribe()
     end
 
     socket =
@@ -63,40 +62,6 @@ defmodule DashboardWeb.NodesLive do
       |> MapSet.to_list
 
     {:noreply, assign(socket, :offline, offline)}
-  end
-
-  def handle_info(%Ears.Events.Noisy{} = event, socket) do
-    key = Atom.to_string(event.node)
-    socket =
-      socket
-      |> assign_new(key, fn -> Node.new(key) end)
-      |> update(key, fn v -> Node.merge_sensor(v, "ears", event) end)
-
-    Logger.debug("Noisy received #{inspect socket.assigns}")
-    {:noreply, socket}
-  end
-
-  def handle_info(%Ears.Events.Quiet{} = event, socket) do
-    key = Atom.to_string(event.node)
-    socket =
-      socket
-      |> assign_new(key, fn -> Node.new(key) end)
-      |> update(key, fn v -> Node.merge_sensor(v, "ears", event) end)
-
-
-    Logger.debug("Quiet received #{inspect socket.assigns}")
-    {:noreply, socket}
-  end
-
-  def handle_info(%Ears.Events.Offline{} = _event, socket) do
-    Logger.debug("Offline received #{inspect socket.assigns}")
-    {:noreply, socket}
-  end
-
-
-  def handle_info(message, socket) do
-    Logger.debug("unrecognized message #{inspect message}")
-    {:noreply, socket}
   end
 
 end
