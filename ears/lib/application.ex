@@ -8,13 +8,14 @@ defmodule Ears.Application do
 
     children = [
       {Phoenix.PubSub.PG2, name: Ears.PubSub},
-      Ears.Sensor
+      Ears.Nodes.Aggregator,
+      Ears.Sensor.Hardware,
     ]
 
     opts = [strategy: :one_for_one, name: Ears.Supervisor]
 
     if Mix.target() == :host do
-      Supervisor.start_link([Ears.MockSensor | children], opts)
+      Supervisor.start_link([Ears.Sensor.MockHardware | children], opts)
     else
       Supervisor.start_link(children, opts)
     end

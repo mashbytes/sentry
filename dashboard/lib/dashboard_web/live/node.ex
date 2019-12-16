@@ -9,10 +9,16 @@ defmodule DashboardWeb.NodeComponent do
 
   def mount(%{node: node}, socket) do
     if connected?(socket) do
-      Ears.subscribe()
+      {:ok, snapshot} = Ears.Nodes.snapshot_and_subscribe(node)
+      socket =
+        socket
+        |> assign("sounds", snapshot)
+
+      {:ok, socket}
+    else
+      {:ok, socket}
     end
 
-    {:ok, assign(socket, :node, node)}
   end
 
   def handle_info(%Ears.Events.Noisy{} = event, socket) do

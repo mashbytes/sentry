@@ -1,4 +1,4 @@
-defmodule Ears.MockSensor do
+defmodule Ears.Sensor.MockHardware do
 
   use GenServer
 

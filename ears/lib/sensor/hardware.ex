@@ -1,10 +1,10 @@
-defmodule Ears.Sensor do
+defmodule Ears.Sensor.Hardware do
 
   use GenServer
 
   require Logger
 
-  alias Ears.PubSub
+  alias Ears.Sensor.PubSub
   alias Ears.Sensor.Model
 
   @input_pin Application.get_env(:ears, :sound_input_pin, 4)

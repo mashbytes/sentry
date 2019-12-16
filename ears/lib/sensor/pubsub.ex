@@ -1,8 +1,7 @@
-defmodule Ears.PubSub do
-  
+defmodule Ears.Sensor.PubSub do
+
   require Logger
 
-  alias Ears.State
   alias Ears.Events
 
   @name __MODULE__
@@ -22,18 +21,6 @@ defmodule Ears.PubSub do
 
   def broadcast(:quiet, since) do
     broadcast(Events.Quiet.new(since))
-  end
-
-  def broadcast(%State.Offline{} = state) do
-    broadcast(Events.Offline.new(state.since))
-  end
-
-  def broadcast(%State.Noisy{} = state) do
-    broadcast(Events.Noisy.new(state.since))
-  end
-
-  def broadcast(%State.Quiet{} = state) do
-    broadcast(Events.Quiet.new(state.since))
   end
 
   def broadcast(message) do

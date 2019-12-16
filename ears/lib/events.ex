@@ -1,5 +1,5 @@
 defmodule Ears.Event do
-  
+
   defmacro __using__(_) do
     quote do
       defstruct [:node, :since]
