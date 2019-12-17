@@ -1,5 +1,5 @@
 defmodule DashboardWeb.NodeComponent do
-  use Phoenix.LiveComponent
+  use Phoenix.LiveView
 
   alias DashboardWeb.ViewModels.Node
 
@@ -8,45 +8,37 @@ defmodule DashboardWeb.NodeComponent do
   def render(assigns), do: Phoenix.View.render(DashboardWeb.PageView, "node.html", assigns)
 
   def mount(%{node: node}, socket) do
+    Logger.debug("DashboardWeb.NodeComponent #{inspect node}")
     if connected?(socket) do
       {:ok, snapshot} = Ears.Nodes.snapshot_and_subscribe(node)
+      Logger.debug("snapshot #{inspect snapshot}")
       socket =
         socket
-        |> assign("sounds", snapshot)
+        |> assign(:sound, snapshot)
 
-      {:ok, socket}
+      {:ok, assign(socket, :node, node)}
     else
-      {:ok, socket}
+      {:ok, assign(socket, :node, node)}
     end
 
   end
 
   def handle_info(%Ears.Events.Noisy{} = event, socket) do
     key = Atom.to_string(event.node)
-    socket =
-      socket
-      |> assign_new(key, fn -> Node.new(key) end)
-      |> update(key, fn v -> Node.merge_sensor(v, "ears", event) end)
-
-    Logger.debug("Noisy received")
-    {:noreply, socket}
+    Logger.debug("#{inspect key}: Noisy received")
+    {:noreply, assign(socket, :sound, event)}
   end
 
   def handle_info(%Ears.Events.Quiet{} = event, socket) do
     key = Atom.to_string(event.node)
-    socket =
-      socket
-      |> assign_new(key, fn -> Node.new(key) end)
-      |> update(key, fn v -> Node.merge_sensor(v, "ears", event) end)
-
-
-    Logger.debug("Quiet received")
-    {:noreply, socket}
+    Logger.debug("#{inspect key}: Quiet received")
+    {:noreply, assign(socket, :sound, event)}
   end
 
-  def handle_info(%Ears.Events.Offline{} = _event, socket) do
-    Logger.debug("Offline received")
-    {:noreply, socket}
+  def handle_info(%Ears.Events.Offline{} = event, socket) do
+    key = Atom.to_string(event.node)
+    Logger.debug("#{inspect key}: Offline received")
+    {:noreply, assign(socket, :sound, event)}
   end
 
 end

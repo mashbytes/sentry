@@ -8,8 +8,8 @@ defmodule Ears.Application do
 
     children = [
       {Phoenix.PubSub.PG2, name: Ears.PubSub},
-      Ears.Nodes.Aggregator,
       Ears.Sensor.Hardware,
+      Ears.Nodes.Aggregator,
     ]
 
     opts = [strategy: :one_for_one, name: Ears.Supervisor]

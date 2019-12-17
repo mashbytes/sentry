@@ -2,7 +2,7 @@ defmodule Ears.Nodes.PubSub do
 
   require Logger
 
-  @name __MODULE__
+  @name Ears.PubSub
 
   def broadcast_node(node, event) when is_atom(node) do
     Phoenix.PubSub.broadcast(@name, topic(node), event)

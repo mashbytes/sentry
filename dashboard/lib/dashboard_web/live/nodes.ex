@@ -6,13 +6,10 @@ defmodule DashboardWeb.NodesLive do
   alias DashboardWeb.ViewModels.Node
 
   def render(assigns) do
-    Logger.debug("render: assigns #{inspect assigns}")
-
     Phoenix.View.render(DashboardWeb.PageView, "nodes.html", assigns)
   end
 
   def mount(_, socket) do
-    Logger.debug("mount")
 
     if connected?(socket) do
       Doorman.subscribe()
@@ -34,8 +31,8 @@ defmodule DashboardWeb.NodesLive do
 
     socket =
       socket
-      |> assign(:online, Enum.map(online, fn x -> Atom.to_string(x) end))
-      |> assign(:offline, Enum.map(offline, fn x -> Atom.to_string(x) end))
+      |> assign(:online, online)
+      |> assign(:offline, offline)
 
     # Logger.debug("handle_info socket.assigns #{inspect socket.assigns}")
 
@@ -47,7 +44,7 @@ defmodule DashboardWeb.NodesLive do
     online =
       socket.assigns.online
       |> MapSet.new
-      |> MapSet.put(Atom.to_string(event.node))
+      |> MapSet.put(event.node)
       |> MapSet.to_list
 
     {:noreply, assign(socket, :online, online)}
@@ -58,7 +55,7 @@ defmodule DashboardWeb.NodesLive do
     offline =
       socket.assigns.offline
       |> MapSet.new
-      |> MapSet.put(Atom.to_string(event.node))
+      |> MapSet.put(event.node)
       |> MapSet.to_list
 
     {:noreply, assign(socket, :offline, offline)}

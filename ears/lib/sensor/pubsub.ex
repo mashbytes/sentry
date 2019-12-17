@@ -4,7 +4,7 @@ defmodule Ears.Sensor.PubSub do
 
   alias Ears.Events
 
-  @name __MODULE__
+  @name Ears.PubSub
   @topic "state"
 
   def subscribe() do
