@@ -44,13 +44,11 @@ defmodule Firmware.MixProject do
       {:ring_logger, "~> 0.6"},
       {:toolshed, "~> 0.2"},
 
+      {:dashboard, path: "../dashboard"},
+
       # Dependencies for all targets except :host
       {:nerves_runtime, "~> 0.6", targets: @all_targets},
       {:nerves_init_gadget, "~> 0.4", targets: @all_targets},
-
-      # {:doorman, path: "../doorman"},
-      # {:ears, path: "../ears"},
-      {:dashboard, path: "../dashboard"},
 
       # Dependencies for specific targets
       {:nerves_system_rpi, "~> 1.8", runtime: false, targets: :rpi},

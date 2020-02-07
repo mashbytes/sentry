@@ -44,6 +44,7 @@ defmodule Dashboard.MixProject do
 
       {:doorman, path: "../doorman"},
       {:ears, path: "../ears"},
+      {:eyes, path: "../eyes"},
 
     ]
   end
