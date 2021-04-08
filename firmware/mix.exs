@@ -44,7 +44,7 @@ defmodule Firmware.MixProject do
       {:ring_logger, "~> 0.6"},
       {:toolshed, "~> 0.2"},
 
-      {:dashboard, path: "../dashboard"},
+      {:sentry, path: "../sentry"},
 
       # Dependencies for all targets except :host
       {:nerves_runtime, "~> 0.6", targets: @all_targets},

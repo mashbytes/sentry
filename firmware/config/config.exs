@@ -26,23 +26,29 @@ config :shoehorn,
 
 config :logger, backends: [RingLogger]
 
-config :dashboard, DashboardWeb.Endpoint,
-  url: [host: "nerves.local"],
-  http: [port: 80],
-  secret_key_base: "ngkJ+MOUsr+mcdcWmiHkyy8L/HqT892cEtLzTKlOyQwxIpWwy6qRa3H5wtZUP2yD",
-  root: Path.dirname(__DIR__),
-  server: true,
-  render_errors: [view: DashboardWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Nerves.PubSub, adapter: Phoenix.PubSub.PG2],
-  live_view: [
-    signing_salt: "SWjnR7UyD/k1ns5TvlpM5aWtp0emA+Mm"
-  ],
-  code_reloader: false
+# # config :sentry, SentryWeb.Endpoint,
+# #   url: [host: "nerves.local"],
+# #   http: [port: 80],
+# #   secret_key_base: "ngkJ+MOUsr+mcdcWmiHkyy8L/HqT892cEtLzTKlOyQwxIpWwy6qRa3H5wtZUP2yD",
+# #   root: Path.dirname(__DIR__),
+# #   server: true,
+# #   render_errors: [view: SentryWeb.ErrorView, accepts: ~w(html json)],
+# #   pubsub: [name: Nerves.PubSub, adapter: Phoenix.PubSub.PG2],
+# #   live_view: [
+# #     signing_salt: "SWjnR7UyD/k1ns5TvlpM5aWtp0emA+Mm"
+# #   ],
+# #   code_reloader: false
 
 
-config :phoenix, :json_library, Jason
+# config :phoenix, :json_library, Jason
 
 
 if Mix.target() != :host do
   import_config "target.exs"
 end
+
+deps_configs = Mix.Project.deps_paths()
+sentry = Map.fetch!(deps_configs, :sentry)
+sentry_config = "#{sentry}/config/config.exs"
+IO.puts("Importing config from #{sentry_config}")
+import_config "#{sentry}/config/config.exs"
